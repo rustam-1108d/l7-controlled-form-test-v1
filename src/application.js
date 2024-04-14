@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import onChange from 'on-change';
 import axios from 'axios';
 
@@ -16,7 +17,7 @@ export default () => {
         <label for="inputEmail">Email</label>
         <input type="text" class="form-control" id="inputEmail" placeholder="Введите email" name="email" required>
       </div>
-      <input type="submit" value="Submit" class="btn btn-primary">
+      <input type="submit" value="Submit" class="btn btn-primary" disabled>
     </form>
   `;
 
@@ -35,6 +36,12 @@ export default () => {
   };
 
   const form = document.querySelector('form');
+  const submit = document.querySelector('[type="submit"]');
+
+  const hasErrors = () => (_.values(state.errors).reduce((acc, curr) => (curr.length > 0
+    ? acc.concat(curr)
+    : acc), [])
+    .length > 0);
 
   const watchedState = onChange(state, (path) => {
     const selector = path.split('.')[1];
@@ -47,6 +54,7 @@ export default () => {
       input.classList.remove('is-invalid');
       input.classList.add('is-valid');
     }
+    submit.disabled = hasErrors(state);
   });
 
   form.addEventListener('input', (e) => {
