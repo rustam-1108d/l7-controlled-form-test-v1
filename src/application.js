@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export default () => {
   const formHTML = `
     <form id="registrationForm">
@@ -15,4 +17,28 @@ export default () => {
 
   const formContainter = document.querySelector('.form-container');
   formContainter.innerHTML = formHTML;
+
+  const state = {
+    errors: {
+      name: [],
+      email: [],
+    },
+    values: {
+      name: '',
+      email: '',
+    },
+  };
+
+  const form = document.querySelector('form');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    axios.post('/users', state.values)
+      .then((response) => {
+        document.body.innerHTML = `<p>${response.data.message}</p>`;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  });
 };
