@@ -1,4 +1,9 @@
+import onChange from 'on-change';
 import axios from 'axios';
+
+const validateName = (name) => (name.trim().length ? [] : ['name cannot be empty']);
+const validateEmail = (email) => (/\w+@\w+/.test(email) ? [] : ['invalid email']);
+const validateField = (fieldname, data) => (fieldname === 'name' ? validateName(data) : validateEmail(data));
 
 export default () => {
   const formHTML = `
@@ -30,6 +35,27 @@ export default () => {
   };
 
   const form = document.querySelector('form');
+
+  const watchedState = onChange(state, (path) => {
+    const selector = path.split('.')[1];
+    const input = document.querySelector(`[name=${selector}]`);
+    const isFieldValid = validateField(selector, state.values[selector]).length === 0;
+    if (!isFieldValid) {
+      input.classList.remove('is-valid');
+      input.classList.add('is-invalid');
+    } else {
+      input.classList.remove('is-invalid');
+      input.classList.add('is-valid');
+    }
+  });
+
+  form.addEventListener('input', (e) => {
+    e.preventDefault();
+    const targetName = e.target.name;
+    const targetData = new FormData(form).get(targetName);
+    watchedState.values[targetName] = targetData;
+    watchedState.errors[targetName] = (validateField(targetName, targetData));
+  });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
